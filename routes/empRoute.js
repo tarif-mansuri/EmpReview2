@@ -8,6 +8,8 @@ empRouter.get('/logout',empCtrl.logout);
 empRouter.get('/all',empCtrl.employees);
 empRouter.delete('/delete/:id',empCtrl.delete);
 empRouter.put('/update/:id', empCtrl.update);
+empRouter.put('/participant/:id', empCtrl.addReviewParticipant);
+empRouter.delete('/participant/:id', empCtrl.removeReviewParticipant);
 
 
 module.exports = empRouter;

@@ -1,4 +1,5 @@
 const empModel = require('../models/employee');
+const reviewModel = require('../models/review');
 module.exports.register =async (req, res)=>{
     const {email, name, password} = req.body;
     //check if user already exists or not
@@ -69,7 +70,7 @@ module.exports.logout = async (req, res)=>{
 
 module.exports.employees = async (req, res)=>{
     //fetch all employees from database
-    const empList =await empModel.find().populate('review');
+    const empList =await empModel.find();
 
     res.status(200);
     res.json({
@@ -82,10 +83,17 @@ module.exports.employees = async (req, res)=>{
 module.exports.delete = async (req, res)=>{
     //get id from url paramaters
     const empId = req.params.id;
-    const user = await empModel.findByIdAndDelete(empId);
+    const empObj = await empModel.findByIdAndDelete(empId);
+    //if employee has been deleted, delete all the reviews made by him from reviews collection
+    if(empObj!=null){
+        const reviewsIdArray = empObj.reviews;
+        for(reviewId of reviewsIdArray){
+            await reviewModel.findByIdAndDelete(reviewId);
+        }
+    }
     res.json({
         "id":empId,
-        "user": user
+        "user": empObj
     })
     return res;
 }
@@ -111,4 +119,78 @@ module.exports.update = async(req, res)=>{
         "user": savedUser
     })
     return res;
-} 
+}
+
+//id passed in url will be id of the employee whose review is happening
+//and id passed in payload ie body will be id of the employee who is being made a participant
+module.exports.addReviewParticipant = async (req, res)=>{
+    const userId = req.headers.cookie?.split('=')[1];
+    if(userId == null || userId == undefined || userId == -1){
+        res.status(403);
+        res.json({
+            "message":"Please Login first"
+        });
+        return res;
+    }
+
+    const empObj =await empModel.findById(userId);
+    if(empObj.is_admin == false){
+        res.status(403);
+        res.json({
+            "message":"Only admin is allowed to add participantes"
+        });
+        return res;
+    }
+
+    const revieweeId = req.params.id;
+    const {participant} = req.body;
+    
+    const emp = await empModel.findById(revieweeId);
+    emp.reviewer_for.push(participant);
+    await emp.save();
+
+    return res.json({
+        "message": "participant has been added successfully"
+    })
+}
+
+//id passed in url will be id of the employee whose review is happening
+//and id passed in payload ie body will be id of the employee who is being made a participant
+module.exports.removeReviewParticipant = async (req, res)=>{
+    const userId = req.headers.cookie?.split('=')[1];
+    if(userId == null || userId == undefined || userId == -1){
+        res.status(403);
+        res.json({
+            "message":"Please Login first"
+        });
+        return res;
+    }
+
+    const empObj =await empModel.findById(userId);
+    if(empObj.is_admin == false){
+        res.status(403);
+        res.json({
+            "message":"Only admin is allowed to add participantes"
+        });
+        return res;
+    }
+
+    const revieweeId = req.params.id;
+    const {participant} = req.body;
+    
+    const emp = await empModel.findById(revieweeId);
+    
+    //remove participant from reviewer_for array
+    let i=0;
+    for(let savedParticipant of emp.reviewer_for){
+        if(savedParticipant == participant){
+            emp.reviewer_for.splice(i, 1);
+            break;
+        }
+    }
+    await emp.save();
+
+    return res.json({
+        "message": "participant has been added successfully"
+    })
+}
