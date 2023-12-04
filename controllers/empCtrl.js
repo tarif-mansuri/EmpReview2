@@ -16,6 +16,7 @@ module.exports.register =async (req, res)=>{
         //return response, user already exists
         res.status(200);
         res.json({
+            'status_code':409,
             'message': 'User already registered',
             'user': userFound
         });
@@ -23,6 +24,7 @@ module.exports.register =async (req, res)=>{
     }
     res.status(201);
         res.json({
+            'status_code':201,
             'message': 'User has been registered successfully',
             'user': savedUser
         });

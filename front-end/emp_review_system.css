@@ -1,0 +1,44 @@
+body{
+    margin:0px;
+}
+.main-header{
+    background-color: rgb(108, 9, 201);
+    height: 50px;
+    padding:2px;
+    display: flex;
+}
+.title-heading h2{
+    margin: 0px;
+    margin-top:10px;
+    margin-left: 590px;
+}
+/*main heading styles*/
+.title-heading{
+    width: 70%;
+}
+.header-buttons{
+    width:30%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+
+.header-buttons button{
+    height: 30px;
+    margin-right: 10px;
+}
+
+
+
+
+
+
+
+.register, .login{
+    margin-top: 100px;
+    text-align: center;
+
+}
+.register input{
+    font-size: 15px;
+}
