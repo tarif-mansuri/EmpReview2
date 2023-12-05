@@ -45,10 +45,11 @@ module.exports.login = async (req, res) =>{
 
     if(password===userFound.password){
         //user logged in successfully
-        res.header('Access-Control-Allow-Origin', 'http://localhost:5500/front-end/emp_review_system.html');
-        res.header('Access-Control-Allow-Credentials', true);
-        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        res.cookie('emp_id', userFound._id.toString());
+        res.cookie('emp_id', userFound._id.toString()),{
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None'
+        };
         res.json({
             'status_code':200,
             'message':'User logged in successfully',
@@ -75,9 +76,17 @@ module.exports.logout = async (req, res)=>{
 }
 
 module.exports.employees = async (req, res)=>{
+    const coockie = req.cookies.emp_id;
+    const loggedInUser = await empModel.findById(coockie);
+    if(loggedInUser==null){
+        res.json({
+            'message': 'User is not logged in',
+            'status_code': 403
+        })
+        return res;
+    }
     //fetch all employees from database
     const empList =await empModel.find();
-
     res.status(200);
     res.json({
         'message': 'Employees fetched successfully',
@@ -87,6 +96,16 @@ module.exports.employees = async (req, res)=>{
 }
 
 module.exports.delete = async (req, res)=>{
+    const coockie = req.cookies.emp_id;
+    const loggedInUser = await empModel.findById(coockie);
+    if(loggedInUser==null){
+        res.json({
+            'message': 'User is not logged in',
+            'status_code': 403
+        })
+        return res;
+    }
+
     //get id from url paramaters
     const empId = req.params.id;
     const empObj = await empModel.findByIdAndDelete(empId);
@@ -105,6 +124,15 @@ module.exports.delete = async (req, res)=>{
 }
 
 module.exports.update = async(req, res)=>{
+    const coockie = req.cookies.emp_id;
+    const loggedInUser = await empModel.findById(coockie);
+    if(loggedInUser==null){
+        res.json({
+            'message': 'User is not logged in',
+            'status_code': 403
+        })
+        return res;
+    }
     //get id from url paramaters
     const empId = req.params.id;
     const {password, name, is_admin} = req.body;
@@ -130,6 +158,15 @@ module.exports.update = async(req, res)=>{
 //id passed in url will be id of the employee whose review is happening
 //and id passed in payload ie body will be id of the employee who is being made a participant
 module.exports.addReviewParticipant = async (req, res)=>{
+    const coockie = req.cookies.emp_id;
+    const loggedInUser = await empModel.findById(coockie);
+    if(loggedInUser==null){
+        res.json({
+            'message': 'User is not logged in',
+            'status_code': 403
+        })
+        return res;
+    }
     const userId = req.headers.cookie?.split('=')[1];
     if(userId == null || userId == undefined || userId == -1){
         res.status(403);
@@ -163,6 +200,15 @@ module.exports.addReviewParticipant = async (req, res)=>{
 //id passed in url will be id of the employee whose review is happening
 //and id passed in payload ie body will be id of the employee who is being made a participant
 module.exports.removeReviewParticipant = async (req, res)=>{
+    const coockie = req.cookies.emp_id;
+    const loggedInUser = await empModel.findById(coockie);
+    if(loggedInUser==null){
+        res.json({
+            'message': 'User is not logged in',
+            'status_code': 403
+        })
+        return res;
+    }
     const userId = req.headers.cookie?.split('=')[1];
     if(userId == null || userId == undefined || userId == -1){
         res.status(403);

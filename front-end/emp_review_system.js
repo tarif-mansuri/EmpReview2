@@ -8,33 +8,110 @@
 
 //Variables
 
+//show register page code starts here
 
-
-
-
-
-
-//Handle Register and Login UI code starts here
 let registerButton = document.getElementById('register');
+
+registerButton.addEventListener('click',()=>{
+    let rootEle = document.getElementById('root');
+    rootEle.innerHTML="";
+    let nameEle = document.createElement('input');
+    nameEle.setAttribute('type','text');
+    nameEle.setAttribute('name','name');
+    nameEle.setAttribute('placeholder','Enter your name');
+    nameEle.setAttribute('id','name');
+
+    let emailEle = document.createElement('input');
+    emailEle.setAttribute('type','email');
+    emailEle.setAttribute('name','email');
+    emailEle.setAttribute('placeholder','Enter your email');
+    emailEle.setAttribute('id','email');
+
+    let passwordEle = document.createElement('input');
+    passwordEle.setAttribute('type','password');
+    passwordEle.setAttribute('name','password');
+    passwordEle.setAttribute('placeholder','Enter your password');
+    passwordEle.setAttribute('id','password');
+
+    let buttonEle = document.createElement('button');
+    buttonEle.innerText = 'Register';
+
+    let divEle = document.createElement('div');
+    divEle.classList.add('register');
+
+    divEle.appendChild(nameEle);
+    divEle.appendChild(emailEle);
+    divEle.appendChild(passwordEle);
+    divEle.appendChild(buttonEle);
+
+    rootEle.appendChild(divEle);
+});
+
+//show register page code ends here
+
+
+//Show Login UI code starts here
 let loginButton = document.getElementById('login');
 
-registerButton.addEventListener('click',showRegister);
+loginButton.addEventListener('click',()=>{
+    let rootEle = document.getElementById('root');
+    rootEle.innerHTML="";
+    let emailEle = document.createElement('input');
+    emailEle.setAttribute('type','email');
+    emailEle.setAttribute('name','email');
+    emailEle.setAttribute('placeholder','Enter your email');
+    emailEle.setAttribute('id','email');
 
-function showRegister(){
-    let registerDiv = document.querySelector('#root .register');
-    registerDiv.style.display = 'block';
-    let loginDiv = document.querySelector('#root .login');
-    loginDiv.style.display = 'none';
-}
+    let passwordEle = document.createElement('input');
+    passwordEle.setAttribute('type','password');
+    passwordEle.setAttribute('name','password');
+    passwordEle.setAttribute('placeholder','Enter your password');
+    passwordEle.setAttribute('id','password');
 
-showRegister();
+    let buttonEle = document.createElement('button');
+    buttonEle.innerText = 'Login';
 
-loginButton.addEventListener('click',(event)=>{
-    let registerDiv = document.querySelector('#root .register');
-    registerDiv.style.display = 'none';
-    let loginDiv = document.querySelector('#root .login');
-    loginDiv.style.display = 'block';
+    let divEle = document.createElement('div');
+    divEle.classList.add('login');
+
+    divEle.appendChild(emailEle);
+    divEle.appendChild(passwordEle);
+    divEle.appendChild(buttonEle);
+
+    rootEle.appendChild(divEle);
+
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function showRegister(){
+//     let registerDiv = document.querySelector('#root .register');
+//     registerDiv.style.display = 'block';
+//     let loginDiv = document.querySelector('#root .login');
+//     loginDiv.style.display = 'none';
+// }
+
+//showRegister();
+
+// loginButton.addEventListener('click',(event)=>{
+//     let registerDiv = document.querySelector('#root .register');
+//     registerDiv.style.display = 'none';
+//     let loginDiv = document.querySelector('#root .login');
+//     loginDiv.style.display = 'block';
+// })
 //Handle Register and Login UI code ends here
 
 
@@ -106,6 +183,7 @@ login.addEventListener('click',()=>{
 async function loginEmp(data){
     let registerPromis = fetch('http://localhost:8000/v1/employees/login',{
         'method':'POST',
+        'credentials':'include',
         'headers':{
             'Content-Type':'application/json'
         },
@@ -141,7 +219,13 @@ async function loginEmp(data){
 
 //Admin view function starts
 async function welcomeAdmin(){
-    let response =await fetch('http://localhost:8000/v1/employees/all');
+    let response =await fetch('http://localhost:8000/v1/employees/all',{
+        'method':'GET',
+        'credentials':'include',
+        'headers':{
+            'Content-Type':'application/json'
+        },
+    });
     let data = await response.json();
     
     let registerDiv = document.querySelector('#root .register');
