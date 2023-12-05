@@ -36,8 +36,8 @@ module.exports.login = async (req, res) =>{
     //check if user exists before login
     const userFound = await empModel.findOne({'email':email});
     if(userFound==null){
-        res.status(404);
         res.json({
+            'status_code':409,
             'message': "User not found in database"
         })
         return res;
@@ -45,16 +45,20 @@ module.exports.login = async (req, res) =>{
 
     if(password===userFound.password){
         //user logged in successfully
+        res.header('Access-Control-Allow-Origin', 'http://localhost:5500/front-end/emp_review_system.html');
+        res.header('Access-Control-Allow-Credentials', true);
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.cookie('emp_id', userFound._id.toString());
-        res.status(200);
         res.json({
-            'message':'User logged in successfully'
+            'status_code':200,
+            'message':'User logged in successfully',
+            'user': userFound
         });
         return res;
     }else{
         //password is not correct
-        res.status(400);
         res.json({
+            'status_code':409,
             'message':'Enter the correct password'
         });
         return res;
