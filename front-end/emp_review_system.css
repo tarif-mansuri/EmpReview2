@@ -42,3 +42,14 @@ body{
 .register input{
     font-size: 15px;
 }
+
+
+/*Eployee homepage style*/
+.emp{
+    width: 80%;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    height: 20px;
+}
