@@ -37,7 +37,7 @@ module.exports.login = async (req, res) =>{
     const userFound = await empModel.findOne({'email':email});
     if(userFound==null){
         res.json({
-            'status_code':409,
+            'status_code':404,
             'message': "User not found in database"
         })
         return res;
@@ -86,11 +86,33 @@ module.exports.employees = async (req, res)=>{
         return res;
     }
     //fetch all employees from database
-    const empList =await empModel.find();
+    const empList =await empModel.find().populate('reviews');
     res.status(200);
     res.json({
         'message': 'Employees fetched successfully',
         'allEmp':empList
+    })
+    return res;
+}
+
+module.exports.employee = async (req, res)=>{
+    const coockie = req.cookies.emp_id;
+    const loggedInUser = await empModel.findById(coockie);
+    if(loggedInUser==null){
+        res.json({
+            'message': 'User is not logged in',
+            'status_code': 403
+        })
+        return res;
+    }
+    //fetch employee by his id from database
+    let id = req.params.id;
+    console.log(id);
+    const empObject =await empModel.findById(id).populate('reviews');
+    res.status(200);
+    res.json({
+        'message': 'Employee fetched successfully',
+        'allEmp':empObject
     })
     return res;
 }
@@ -117,6 +139,7 @@ module.exports.delete = async (req, res)=>{
         }
     }
     res.json({
+        'status_code':204,
         "id":empId,
         "user": empObj
     })
@@ -146,11 +169,11 @@ module.exports.update = async(req, res)=>{
     if(is_admin!=null){
         data.is_admin = is_admin;
     }
-    const savedUser = await empModel.findByIdAndUpdate(empId, data);
+    const userData = await empModel.findByIdAndUpdate(empId, data);
     res.status(201);
     res.json({
         "message":"Employee updated successfully",
-        "user": savedUser
+        "user": userData
     })
     return res;
 }

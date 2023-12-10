@@ -18,6 +18,7 @@ module.exports.addReview = async (req, res)=>{
         "review_by" : review_by
     });
 
+    const addedReview = await reviewModel.findById(review._id.toString()).populate('review_by');
     //update employee(with review id) for whom review has been given
     let empObj =await empModel.findById(review_for);
     empObj.reviews.push(review._id.toString());
@@ -25,7 +26,7 @@ module.exports.addReview = async (req, res)=>{
     res.status(201);
     res.json({
         "message":"Review added successfully",
-        "review": review
+        "review": addedReview
     });
     return res;
 }
@@ -54,6 +55,7 @@ module.exports.deleteReview = async (req, res)=>{
         const updated = await reviewModel.findByIdAndDelete(reviewId);
         if(updated==null){
             return res.json({
+                'status_code':'404',
                 "message":"Review does not exists"
             })
         }
@@ -72,6 +74,7 @@ module.exports.deleteReview = async (req, res)=>{
         }
         await empObj.save();
         res.json({
+            'status_code':204,
             "message":"Review was deleted successfully",
             'review':updated
         });

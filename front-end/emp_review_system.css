@@ -29,11 +29,6 @@ body{
 }
 
 
-
-
-
-
-
 .register, .login{
     margin-top: 100px;
     text-align: center;
@@ -53,3 +48,42 @@ body{
     padding: 5px;
     height: 20px;
 }
+
+.credentials{
+    width: 30%;
+}
+.btn-field{
+    width: 5%;
+}
+
+/*Review-Input styles*/
+
+.review-input{
+    display: flex;
+    margin: auto;
+    width: 70%;
+    justify-content: space-around;
+}
+.right-review-section{
+    margin-top: 10px;
+}
+
+/*Review styles*/
+#reviews-container{
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    margin: auto;
+
+}
+.auther{
+    text-align: end;
+}
+
+.reviews{
+    background-color: aquamarine;
+    border: 1px solid black;
+    margin-top: 5px;
+    padding: 5px;
+}
+

@@ -1,12 +1,3 @@
-// async function getAllEmployees(){
-//     let response =await fetch('http://localhost:8000/v1/employees/all');
-//     let data = await response.json();
-//     console.log(data);
-// }
-
-// getAllEmployees();
-
-//Variables
 
 //show register page code starts here
 
@@ -65,7 +56,16 @@ registerButton.addEventListener('click',()=>{
             'body':JSON.stringify(data)
 
         }).then((data)=>{
-            console.log(data);
+            return data.json();
+        }).then((data)=>{
+            h1Ele = document.createElement('h1');
+            if(data.status_code === 409){
+                h1Ele.innerText = `${data.message}`;
+            }else{
+                h1Ele.innerText = `Hi ${data.user.name}, You have been registered successfully`
+            }
+            rootEle.innerHTML = "";
+            rootEle.appendChild(h1Ele);
         })
     })
 });
@@ -123,8 +123,27 @@ loginButton.addEventListener('click',()=>{
         }).then((data)=>{
             return data.json();
         }).then((data)=>{
-            if(data.user.is_admin===true){
+            //1 user's email not registered in database
+            //2 wront credentials
+            //3 user is an admin
+            //4 user is an employee
+            h1Ele = document.createElement('h1');
+            let rootEle = document.getElementById('root');
+            rootEle.innerHTML = "";
+            if(data.status_code===404){
+                //user not registered
+                h1Ele.innerText = 'User is not registered, Please register';
+                rootEle.appendChild(h1Ele);
+            }else if(data.status_code===409){
+                //wrong credentials
+                h1Ele.innerText = 'Incorrect userid or password';
+                rootEle.appendChild(h1Ele);
+            }else if(data.user.is_admin === true){
+                //User is an admin
                 welcomeAdmin();
+            }else{
+                //User is an employee
+                welcomEmployee(data);
             }
         })
     })
@@ -147,22 +166,41 @@ function welcomeAdmin(){
         for(empObj of empList){
             let nameEle = document.createElement('label');
             nameEle.innerText = empObj.name;
+            nameEle.classList.add('credentials');
+
             let emailEle = document.createElement('label');
             emailEle.innerText = empObj.email;
+            emailEle.classList.add('credentials');
+
             let roleEle = document.createElement('label');
             roleEle.innerText = empObj.is_admin===true?'Admin':'Employee';
+            roleEle.classList.add('btn-field');
 
             let reviewButton = document.createElement('button');
             reviewButton.innerText = 'Reviews';
+            reviewButton.classList.add('btn-field');
+
+            //Adding review listener
+            reviewButton.addEventListener('click', (event)=>showReviews(event));
 
             let updateButton = document.createElement('button');
             updateButton.innerText = 'Update';
+            updateButton.classList.add('btn-field');
+
+            //Adding update listener
+            updateButton.addEventListener('click',updateEmployee);
 
             let deleteButton = document.createElement('button');
             deleteButton.innerText = 'Delete';
+            deleteButton.classList.add('btn-field');
+
+            //Adding delete listener
+            deleteButton.addEventListener('click', deleteEmployee);
 
             let divEle = document.createElement('div');
             divEle.classList.add('emp');
+
+            divEle.setAttribute('id',empObj._id.toString());
 
             divEle.appendChild(nameEle);
             divEle.appendChild(emailEle);
@@ -175,159 +213,258 @@ function welcomeAdmin(){
     }))
 }
 
+//Welcome Employee function starts here
+function welcomEmployee(){
+    //1.fetch employee's own data, and show in UI + fetch data of all those employees whom he can review
+    //2.Employee can see all those employees for whome he has been made a reviewer
+}
 
+//Delete Employee code starts here
+function deleteEmployee(event){
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// function showRegister(){
-//     let registerDiv = document.querySelector('#root .register');
-//     registerDiv.style.display = 'block';
-//     let loginDiv = document.querySelector('#root .login');
-//     loginDiv.style.display = 'none';
-// }
-
-//showRegister();
-
-// loginButton.addEventListener('click',(event)=>{
-//     let registerDiv = document.querySelector('#root .register');
-//     registerDiv.style.display = 'none';
-//     let loginDiv = document.querySelector('#root .login');
-//     loginDiv.style.display = 'block';
-// })
-//Handle Register and Login UI code ends here
-
-
-//Register Employee code starts here
-// const submitButton = document.getElementById('register-button');
-// submitButton.addEventListener('click',()=>{
-//     //taking data from each inputs
-//     const name = document.getElementById('name').value;
-//     document.getElementById('name').value = "";
-//     const email = document.getElementById('email').value;
-//     document.getElementById('email').value = "";
-//     const password = document.getElementById('password').value;
-//     document.getElementById('password').value = "";
-//     //console.log(name, email, password);
-//     let inputData = {
-//         'email':email,
-//         'name':name,
-//         'password':password
-//     }
-//     registerEmp(inputData);
-// })
-
-async function registerEmp(data){
-    let registerPromis = fetch('http://localhost:8000/v1/employees/register',{
-        'method':'POST',
+    let divEle = event.target.parentElement;
+    let id = divEle.id;
+    fetch(`http://localhost:8000/v1/employees/delete/${id}`,{
+        'method':'DELETE',
+        'credentials':'include',
         'headers':{
-            'Content-Type':'application/json'
-        },
-        'body':JSON.stringify(data)
+            'content-cype':'application/json'
+        }
+
+    }).then((data)=>{
+        return data.json();
+    }).then((data)=>{
+        let rootEle = document.getElementById('root');
+        if(data.status_code===204){
+            rootEle.removeChild(divEle)
+        }
+    }) 
+}//Delete Employee code ends here
+
+//Update Employee code starts here
+function updateEmployee(event){
+    let clickedDivEle = event.target.parentElement;
+    let id = clickedDivEle.id;
+
+    let inputName = document.createElement('input');
+    inputName.classList.add('credentials');
+    inputName.setAttribute('value', clickedDivEle.children[0].innerText);
+
+    let inputEmail = document.createElement('input');
+    inputEmail.classList.add('credentials');
+    inputEmail.setAttribute('value', clickedDivEle.children[1].innerText);
+
+    let inputRole = document.createElement('input');
+    inputRole.classList.add('btn-field');
+    inputRole.setAttribute('value',clickedDivEle.children[2].innerText);
+
+    let reviewButton = document.createElement('button');
+    reviewButton.classList.add('btn-field');
+    reviewButton.innerText = clickedDivEle.children[3].innerText;
+
+    let doneButton = document.createElement('button');
+    doneButton.classList.add('btn-field');
+    doneButton.innerText = 'Done';
+
+
+    //Update data in database
+    doneButton.addEventListener('click',()=>{
+        let name = inputName.value;
+        let email = inputEmail.value;
+        let role = inputRole.value;
+
+        let data = {
+            'name':name,
+            'email':email,
+            'is_admin': role==='Admin'?true:false
+        }
+
+        fetch(`http://localhost:8000/v1/employees/update/${id}`,{
+            'credentials':'include',    
+            'method':'PUT',
+            'headers':{
+               'Content-Type':'application/json' 
+            },
+            body:JSON.stringify(data)
+        }).then((data)=>{
+            return data.json();
+        }).then((data)=>{
+            welcomeAdmin();
+        })
     })
 
-    let responseData = await registerPromis.then((res)=>{
-        if(res.ok){
-            return res.json();
-        }else{
-            //throw error
+    let deleteButton = document.createElement('button');
+    deleteButton.classList.add('btn-field');
+    deleteButton.innerText = clickedDivEle.children[5].innerText;
+
+    let divEle = document.createElement('div');
+    divEle.classList.add('emp');
+    divEle.setAttribute('id',id);
+
+    divEle.appendChild(inputName);
+    divEle.appendChild(inputEmail);
+    divEle.appendChild(inputRole);
+    divEle.appendChild(reviewButton);
+    divEle.appendChild(doneButton);
+    divEle.appendChild(deleteButton);
+
+    let rootEle = document.getElementById('root');
+    rootEle.replaceChild(divEle, clickedDivEle);
+}
+
+function showReviews(event){
+    let id = event.target.parentElement.id;
+    fetch(`http://localhost:8000/v1/employees/${id}`,{
+        'method':'GET',
+        'credentials':'include',
+        'headers':{
+            'content-type':'application/json'
+        },
+
+    }).then((data)=>{
+        return data.json();
+    }).then((data)=>{
+        let reviewArr = data.allEmp.reviews;
+        let id = data.allEmp._id.toString();
+        let name = data.allEmp.name;
+        let email = data.allEmp.email;
+
+        let nameEle = document.createElement('h3');
+        nameEle.innerText = `Name : ${name}`
+        let emailEle = document.createElement('h3');
+        emailEle.innerText = `Email : ${email}`
+
+        let sectionEle1 = document.createElement('section');
+        sectionEle1.appendChild(nameEle);
+        sectionEle1.appendChild(emailEle);
+
+        let textAreaEle = document.createElement('textarea');
+        textAreaEle.setAttribute('cols','60');
+        textAreaEle.setAttribute('rows','4');
+        textAreaEle.setAttribute('id', 'input-text-area');
+        
+        let buttonEle = document.createElement('button');
+        buttonEle.innerText = 'Add Review';
+        buttonEle.addEventListener('click',(event)=> addReview(event, id));
+
+        let sectionEle2 = document.createElement('section');
+        sectionEle2.classList.add('right-review-section');
+        sectionEle2.appendChild(textAreaEle);
+        sectionEle2.appendChild(buttonEle);
+
+        let inputContainerDiv = document.createElement('div');
+        inputContainerDiv.classList.add('review-input');
+
+        inputContainerDiv.appendChild(sectionEle1);
+        inputContainerDiv.appendChild(sectionEle2);
+
+        let rootEle = document.getElementById('root');
+        rootEle.innerHTML = '';
+        rootEle.appendChild(inputContainerDiv);
+
+        //show all reviews of employee
+        const revewsArr = data.allEmp.reviews;
+        for(let review of revewsArr){
+            let reviewEle = document.createElement('p');
+            reviewEle.innerText = review.message;
+
+            let authorEle = document.createElement('p');
+            authorEle.classList.add('auther');
+            fetch(`http://localhost:8000/v1/employees/${review.review_by.toString()}`,{
+                'credentials':'include'
+            }).then((data)=>{
+                return data.json();
+            }).then((data)=>{
+                authorEle.innerText =`Review By : ${data.allEmp.name}`;
+            })
+            //authorEle.innerText =`Review By : ${reviewrName}`;
+            authorEle.classList.add('auther');
+
+            let divEle = document.createElement('div');
+            divEle.classList.add('reviews');
+            divEle.setAttribute('id',review._id.toString());
+
+            divEle.appendChild(reviewEle);
+            divEle.appendChild(authorEle);
+
+            let btnEle = document.createElement('button');
+            btnEle.addEventListener('click',(event)=>deleteReview(event, review._id.toString()));
+            btnEle.innerText = 'Delete';
+
+            divEle.appendChild(btnEle);
+
+            let reviewContainer = document.getElementById('reviews-container');
+            reviewContainer.appendChild(divEle);
         }
     })
+}
 
-    registerPromis.catch((error)=>{
-        console.log('Error');
-    })
-    //work with response
-    if(responseData.status_code===409){
-        alert(responseData.message);
-    }else if(responseData.status_code===201){
-        alert(responseData.message);
+function addReview(event, empId){
+    //console.log(`addReview: ${loggedInData}`);
+    //push review into data base
+    let textInputAreaEle = document.getElementById('input-text-area');
+    let text = textInputAreaEle.value;
+    let data = {
+        'message':text,
+        'review_for':empId
     }
+    fetch(`http://localhost:8000/v1/reviews/add`,{
+        'method':'POST',
+        'credentials':'include',
+        'headers':{
+            'content-type':'application/json'
+        },
+        'body':JSON.stringify(data)
+    }).then((data)=>{
+        return data.json();
+    }).then(data=>{
+       // console.log(data);
+        //show review in ui
+        let reviewEle = document.createElement('p');
+        reviewEle.innerText = data.review.message;
+
+        let authorEle = document.createElement('p');
+        authorEle.classList.add('auther');
+        authorEle.innerText =`Written By : ${data.review.review_by.name}`;
+        authorEle.classList.add('auther');
+
+        let divEle = document.createElement('div');
+        divEle.classList.add('reviews');
+        divEle.setAttribute('id',data.review._id.toString());
+
+        divEle.appendChild(reviewEle);
+        divEle.appendChild(authorEle);
+
+        let btnEle = document.createElement('button');
+        btnEle.addEventListener('click',(event)=>deleteReview(event, data.review._id.toString()));
+        btnEle.innerText = 'Delete';
+
+        divEle.appendChild(btnEle);
+
+        let reviewContainer = document.getElementById('reviews-container');
+
+        reviewContainer.appendChild(divEle);
+    })
     
 }
-//Register Employee code ends here
 
-
-//Login Employee code starts here
-const login = document.getElementById('login-button');
-// login.addEventListener('click',()=>{
-//     //taking data from each inputs
-//     const email = document.getElementById('email-login').value;
-//     document.getElementById('email-login').value = "";
-//     const password = document.getElementById('password-login').value;
-//     document.getElementById('password-login').value = "";
-//     let inputData = {
-//         'email':email,
-//         'password':password
-//     }
-//     loginEmp(inputData);
-// })
-
-// async function loginEmp(data){
-//     let registerPromis = fetch('http://localhost:8000/v1/employees/login',{
-//         'method':'POST',
-//         'credentials':'include',
-//         'headers':{
-//             'Content-Type':'application/json'
-//         },
-//         'body':JSON.stringify(data)
-//     })
-
-//     let responseData = await registerPromis.then((res)=>{
-//         if(res.ok){
-//             return res.json();
-//         }else{
-//             //throw error
-//         }
-//     })
-
-//     registerPromis.catch((error)=>{
-//         console.log('Error');
-//     })
-//     //work with response
-//     if(responseData.status_code===200){
-//         //successfully logged in
-//         if(responseData.user.is_admin===true){
-//             //user is admin
-//             welcomeAdmin();
-//         }else{
-//             //user is not an admin
-//         }
-//     }else {
-//         console.log('Password or email id is wrong');
-//     }
-// }
-// //Login Employee code ends here
-
-
-// //Admin view function starts
-// async function welcomeAdmin(){
-//     let response =await fetch('http://localhost:8000/v1/employees/all',{
-//         'method':'GET',
-//         'credentials':'include',
-//         'headers':{
-//             'Content-Type':'application/json'
-//         },
-//     });
-//     let data = await response.json();
-    
-//     let registerDiv = document.querySelector('#root .register');
-//     registerDiv.style.display = 'none';
-//     let loginDiv = document.querySelector('#root .login');
-//     loginDiv.style.display = 'none';
-
-//     console.log(data);
-//     //show the data on UI
-// }
+function deleteReview(event, id){
+    fetch(`http://localhost:8000/v1/reviews/delete/${id}`,{
+        'method':'DELETE',
+        'credentials':'include',
+        'headers':{
+            'content-type':'application/json'
+        }
+    }).then((data)=>{
+        return data.json();
+    }).then((data)=>{
+        console.log(data);
+        if(data.status_code===204){
+            let reviewContainerEle = document.getElementById('reviews-container');
+            console.log(reviewContainerEle);
+            let deletedChildEle = document.getElementById(id);
+            console.log(deletedChildEle);
+            reviewContainerEle.removeChild(deletedChildEle);
+        }
+    })
+}
