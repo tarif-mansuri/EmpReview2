@@ -18,15 +18,14 @@ module.exports.addReview = async (req, res)=>{
         "review_by" : review_by
     });
 
-    const addedReview = await reviewModel.findById(review._id.toString()).populate('review_by');
     //update employee(with review id) for whom review has been given
     let empObj =await empModel.findById(review_for);
     empObj.reviews.push(review._id.toString());
     await empObj.save();
-    res.status(201);
     res.json({
+        'status_code':201,
         "message":"Review added successfully",
-        "review": addedReview
+        "review": review
     });
     return res;
 }
@@ -52,31 +51,29 @@ module.exports.deleteReview = async (req, res)=>{
         return res;
     }
     if(reviewId!=null){
-        const updated = await reviewModel.findByIdAndDelete(reviewId);
-        if(updated==null){
-            return res.json({
-                'status_code':'404',
-                "message":"Review does not exists"
-            })
-        }
-        const review_for = updated.review_for;
+        const deletedReview = await reviewModel.findByIdAndDelete(reviewId);
+        // if(updated==null){
+        //     return res.json({
+        //         'status_code':'404',
+        //         "message":"Review does not exists"
+        //     })
+        // }
+        const review_for = deletedReview.review_for;
         let empObj = await empModel.findById(review_for);
         let i=0;
         for(;i<empObj.reviews.length;i++){
             if(empObj.reviews[i]==reviewId){
+                empObj.reviews.splice(i,1);
                 break;
             }
         }
         //either i is pointing to the element which we want to remove
         //or element was not found
-        if(i<empObj.reviews.length){
-            empObj.reviews.splice(i,1);
-        }
         await empObj.save();
         res.json({
             'status_code':204,
             "message":"Review was deleted successfully",
-            'review':updated
+            'review':deletedReview
         });
         return res;
     }
@@ -94,11 +91,13 @@ module.exports.updateReview = async (req, res)=>{
     }
     if(reviewId!=null){
         const message = req.body.message;
+        //update call updates the entry in db but returns the old object
         const review = await reviewModel.findByIdAndUpdate(reviewId,{"message": message});
-        res.status(201)
+        const updatedReview = await reviewModel.findById(review._id.toString());
         res.json({
+            'status_code':'200',
             "message":"Review has been updated successfully",
-            'review':review
+            'review':updatedReview
         });
         return res;
     }

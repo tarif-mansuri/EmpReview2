@@ -61,7 +61,7 @@ body{
 .review-input{
     display: flex;
     margin: auto;
-    width: 70%;
+    width: 80%;
     justify-content: space-around;
 }
 .right-review-section{

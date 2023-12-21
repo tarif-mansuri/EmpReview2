@@ -6,11 +6,12 @@ empRouter.post('/register',empCtrl.register);
 empRouter.post('/login',empCtrl.login);
 empRouter.get('/logout',empCtrl.logout);
 empRouter.get('/all',empCtrl.employees);
+empRouter.get('/initsession', empCtrl.whoAmI)
 empRouter.get('/:id',empCtrl.employee);
 empRouter.delete('/delete/:id',empCtrl.delete);
 empRouter.put('/update/:id', empCtrl.update);
-empRouter.put('/participant/:id', empCtrl.addReviewParticipant);
-empRouter.delete('/participant/:id', empCtrl.removeReviewParticipant);
+empRouter.put('/addreviwer', empCtrl.addReviewParticipant);
+empRouter.delete('/participant/:id', empCtrl.removeReviewParticipant);;
 
 
 module.exports = empRouter;

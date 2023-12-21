@@ -67,10 +67,10 @@ module.exports.login = async (req, res) =>{
 }
 
 module.exports.logout = async (req, res)=>{
-    res.cookie('emp_id', '-1');
-        res.status(200);
+        res.cookie('emp_id', '-1');
         res.json({
-            message: 'Logged out successfully'
+            'status_code':200,
+            'message': 'You have logged out successfully.'
         });
         return res;
 }
@@ -107,12 +107,11 @@ module.exports.employee = async (req, res)=>{
     }
     //fetch employee by his id from database
     let id = req.params.id;
-    console.log(id);
     const empObject =await empModel.findById(id).populate('reviews');
     res.status(200);
     res.json({
         'message': 'Employee fetched successfully',
-        'allEmp':empObject
+        'employee':empObject
     })
     return res;
 }
@@ -178,22 +177,33 @@ module.exports.update = async(req, res)=>{
     return res;
 }
 
-//id passed in url will be id of the employee whose review is happening
-//and id passed in payload ie body will be id of the employee who is being made a participant
-module.exports.addReviewParticipant = async (req, res)=>{
+module.exports.whoAmI = async(req, res)=>{
     const coockie = req.cookies.emp_id;
     const loggedInUser = await empModel.findById(coockie);
     if(loggedInUser==null){
         res.json({
-            'message': 'User is not logged in',
-            'status_code': 403
+            'status_code': 403,
+            'message': 'User is not logged in'
+        })
+        return res;
+    }else{
+        res.json({
+            'status_code':200,
+            'user':loggedInUser
         })
         return res;
     }
+
+}
+
+//id passed in url will be id of the employee whose review is happening
+//and id passed in payload ie body will be id of the employee who is being made a participant
+module.exports.addReviewParticipant = async (req, res)=>{
+
     const userId = req.headers.cookie?.split('=')[1];
     if(userId == null || userId == undefined || userId == -1){
-        res.status(403);
         res.json({
+            'status_code':403,
             "message":"Please Login first"
         });
         return res;
@@ -201,23 +211,24 @@ module.exports.addReviewParticipant = async (req, res)=>{
 
     const empObj =await empModel.findById(userId);
     if(empObj.is_admin == false){
-        res.status(403);
         res.json({
-            "message":"Only admin is allowed to add participantes"
+            'status_code':401,
+            "message":"Only admin is allowed to add Reviewer"
         });
         return res;
     }
 
-    const revieweeId = req.params.id;
-    const {participant} = req.body;
+    let revieweeId = req.body.id;
+    let reviewerEmail = req.body.email;
     
-    const emp = await empModel.findById(revieweeId);
-    emp.reviewer_for.push(participant);
-    await emp.save();
-
-    return res.json({
-        "message": "participant has been added successfully"
-    })
+    let reviewerEmployee = await empModel.findOne({'email':reviewerEmail});
+    reviewerEmployee.reviewer_for.push(revieweeId);
+    await reviewerEmployee.save();
+    
+    res.json({
+        'status_code':201,
+        'message':'Reviewer added successfully'
+    });
 }
 
 //id passed in url will be id of the employee whose review is happening
