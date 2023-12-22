@@ -2,11 +2,20 @@ const reviewModel = require('../models/review');
 const empModel = require('../models/employee');
 
 module.exports.addReview = async (req, res)=>{
-    const {message, review_for} = req.body;
+    
+    const message = req?.body?.message? req.body.message: null;
+    const review_for = req?.body?.review_for? req.body.review_for : null;
+    if(message==undefined || message==null){
+        res.json({
+            'status_code':500,
+            "message":"Message can not be empty"
+        });
+        return res;
+    }
     const review_by = req.headers.cookie?.split('=')[1];
     if(review_by == null || review_by == undefined || review_by == -1){
-        res.status(403);
         res.json({
+            'status_code':403,
             "message":"Please Login first"
         });
         return res;
@@ -97,6 +106,30 @@ module.exports.updateReview = async (req, res)=>{
         res.json({
             'status_code':'200',
             "message":"Review has been updated successfully",
+            'review':updatedReview
+        });
+        return res;
+    }
+}
+
+module.exports.addFeedback = async (req, res)=>{
+    const reviewId = req.params.id;
+    const review_by = req.headers.cookie?.split('=')[1];
+    if(review_by == null || review_by == undefined || review_by == -1){
+        res.status(403);
+        res.json({
+            "message":"Please Login first"
+        });
+        return res;
+    }
+    if(reviewId!=null){
+        const feedback = req.body?.feedback;
+        //update call updates the entry in db but returns the old object
+        const review = await reviewModel.findByIdAndUpdate(reviewId,{"feedback": feedback});
+        const updatedReview = await reviewModel.findById(review._id.toString());
+        res.json({
+            'status_code':'200',
+            "message":"Feedback has been added Successfully",
             'review':updatedReview
         });
         return res;

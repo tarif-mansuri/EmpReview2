@@ -178,22 +178,20 @@ module.exports.update = async(req, res)=>{
 }
 
 module.exports.whoAmI = async(req, res)=>{
-    const coockie = req.cookies.emp_id;
-    const loggedInUser = await empModel.findById(coockie);
-    if(loggedInUser==null){
+    const coockie = req.cookies.emp_id.toString();
+    if(coockie == -1 || coockie == '-1' || coockie == null || coockie == undefined){
         res.json({
             'status_code': 403,
             'message': 'User is not logged in'
         })
         return res;
-    }else{
+    }
+    const loggedInUser = await empModel.findById(coockie);  
         res.json({
             'status_code':200,
             'user':loggedInUser
         })
         return res;
-    }
-
 }
 
 //id passed in url will be id of the employee whose review is happening

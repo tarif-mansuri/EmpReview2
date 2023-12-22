@@ -7,5 +7,6 @@ reviewRoute.get('/', reviewCtrl.allReviews);
 reviewRoute.delete('/delete/:id', reviewCtrl.deleteReview);
 //put call updates the entry in db but returns the old object
 reviewRoute.put('/update/:id', reviewCtrl.updateReview);
+reviewRoute.put('/feedback/:id', reviewCtrl.addFeedback);
 
 module.exports = reviewRoute;

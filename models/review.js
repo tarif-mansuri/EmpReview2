@@ -15,6 +15,10 @@ const reviewSchema = new Schema({
     review_by:{
         type: Schema.Types.ObjectId,
         ref:"employee"
+    },
+    feedback:{
+        type: String,
+        required: false
     } 
 },{
     timestamps:true
