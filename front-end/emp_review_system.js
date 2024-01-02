@@ -152,7 +152,7 @@ loginButton.addEventListener('click',()=>{
                     welcomeAdmin();
                 }else{
                     //User is an employee
-                    welcomEmployee(data.user);
+                    welcomEmployee(data.user, false);
                 }
             }
         })
@@ -267,9 +267,11 @@ function showEmployeeUtil(empObj, isAdmin){
 function welcomEmployee(empObj){
             //1.fetch employee's own data, and show in UI + fetch data of all those employees whom he can review
             //2.Employee can see all those employees for whome he has been made a reviewer
+            //working
             showEmployeeUtil(empObj);
             let reviewerFor = empObj.reviewer_for;
             for(let empId of reviewerFor){
+                console.log(empId);
                 fetch(`http://localhost:8000/v1/employees/${empId}`,{
                     'method':'GET',
                     'headers':{
@@ -579,7 +581,6 @@ function showReviews(event){
 }
 
 function addReview(event, empId){
-    //console.log(`addReview: ${loggedInData}`);
     //push review into data base
     let textInputAreaEle = document.getElementById('input-text-area');
     let text = textInputAreaEle.value;
@@ -597,7 +598,6 @@ function addReview(event, empId){
     }).then((data)=>{
         return data.json();
     }).then(data=>{
-       // console.log(data);
         //show review in ui
         let reviewEle = document.createElement('p');
         reviewEle.innerText = data.review.message;
@@ -650,13 +650,10 @@ function deleteReview(event, id){
         }
     }).then((data)=>{
         return data.json();
-    }).then((data)=>{
-        console.log(data);
+    }).then((data)=>{   
         if(data.status_code===204){
             let reviewContainerEle = document.getElementById('reviews-container');
-            console.log(reviewContainerEle);
             let deletedChildEle = document.getElementById(id);
-            console.log(deletedChildEle);
             reviewContainerEle.removeChild(deletedChildEle);
         }
     })
@@ -749,7 +746,6 @@ function addFeedback(id){
                 return promiseObj.json();
             }
         ).then((resData)=>{
-            console.log(resData);
             reviewDiv.removeChild(reviewDiv.lastChild);
             reviewDiv.removeChild(reviewDiv.lastChild);
             let h4Ele = document.createElement('h4');
